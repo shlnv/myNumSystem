@@ -1,4 +1,5 @@
 const myNumSystem = (characterSet) => {
+    if (characterSet.length <= 1) throw new Error('System should be at least binary');
     const characterArray = characterSet.split('');
     const checkIfFirst0 = () => {
         if (!(characterArray[0] === '0')) throw new Error('Character set should start with 0 (zero)')
@@ -20,28 +21,28 @@ const myNumSystem = (characterSet) => {
     const self = {
         decimalToMySystem: (number) => {
             number = parseInt(number);
-            if (typeof number == NaN) throw new Error('You passed string to decimalToBase62(). You should pass a number')
+            if (typeof number == NaN) throw new Error('You passed string to decimalToMySystem(). You should pass a number')
             if (number === 0) return '0';
             if (number < 0) throw new Error('myNumSystem works only with positive numbers');
-            let base62Number = '';
+            let mySysNumber = '';
             while (number > 0) {
-                base62Number = characterSet[number % 62] + base62Number;
-                number = Math.floor(number / 62);
+                mySysNumber = characterSet[number % characterArray.length] + mySysNumber;
+                number = Math.floor(number / characterArray.length);
             }
-            return base62Number;
+            return mySysNumber;
         },
         mySystemToDecimal: (string) => {
             string = string + '';
             checkIfCorrectNumber(string);
             let number = 0;
             for (let i = 0; i < string.length; i++) {
-                number = number * 62 + characterSet.indexOf(string[i]);
+                number = number * characterArray.length + characterSet.indexOf(string[i]);
             }
             return number;
         },
         compare: (string1, string2) => {
-            if(string1 === '') return 1;
-            if(string2 === '') return -1;
+            if (string1 === '') return 1;
+            if (string2 === '') return -1;
             string1 = string1 + '';
             string2 = string2 + '';
             checkIfCorrectNumber(string1);
@@ -50,17 +51,23 @@ const myNumSystem = (characterSet) => {
             const number2 = self.mySystemToDecimal(string2);
             return number1 - number2;
         },
-        sort: (unsortedArrayOfBase62Numbers) => {
-            return unsortedArrayOfBase62Numbers.sort((a, b) => self.compare(a, b));
+        sort: (unsortedArrayOfMySysNumbers) => {
+            return unsortedArrayOfMySysNumbers.sort((a, b) => self.compare(a, b));
         },
-        nextNumber: (base62Number) => {
-            base62Number = base62Number + '';
-            checkIfCorrectNumber(base62Number);
-            let decimalNumber = self.mySystemToDecimal(base62Number);
+        nextNumber: (mySysNumber) => {
+            mySysNumber = mySysNumber + '';
+            checkIfCorrectNumber(mySysNumber);
+            let decimalNumber = self.mySystemToDecimal(mySysNumber);
             return self.decimalToMySystem(decimalNumber + 1);
         },
-        findFirstMissed: (base62Array) => {
-            let sortedArray = self.sort(base62Array);
+        previousNumber: (mySysNumber) => {
+            mySysNumber = mySysNumber + '';
+            checkIfCorrectNumber(mySysNumber);
+            let decimalNumber = self.mySystemToDecimal(mySysNumber);
+            return self.decimalToMySystem(decimalNumber - 1);
+        },
+        findFirstMissed: (mySysArray) => {
+            let sortedArray = self.sort(mySysArray);
             for (let i = 0; i < sortedArray.length - 1; i++) {
                 let current = self.mySystemToDecimal(sortedArray[i]);
                 let next = self.mySystemToDecimal(sortedArray[i + 1]);
@@ -69,6 +76,15 @@ const myNumSystem = (characterSet) => {
                 }
             }
             return self.nextNumber(sortedArray[sortedArray.length - 1]);
+        },
+        getMaxNum: (numberOfDigits) => {
+            if (numberOfDigits == 0) return '0';
+            const maxDigit = characterArray[characterArray.length - 1];
+            let maxNum = '';
+            for (let i = 0; i < numberOfDigits; i++) {
+                maxNum = maxNum + maxDigit;
+            }
+            return maxNum;
         }
     };
     return self;
